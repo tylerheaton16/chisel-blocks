@@ -1,0 +1,41 @@
+import mill._
+import mill.scalalib._
+import mill.scalalib.scalafmt._
+
+// Versions
+object v {
+  // Dependencies
+  val scalaVersion  = "2.13.14"
+  val chiselVersion = "6.5.0"
+  val chisel        = ivy"org.chipsalliance::chisel:${chiselVersion}"
+  val chiselPlugin  = ivy"org.chipsalliance:::chisel-plugin:${chiselVersion}"
+}
+
+trait BaseModule extends ScalaModule {
+  def scalaVersion = v.scalaVersion
+}
+
+trait ChiselModule extends BaseModule {
+  def ivyDeps             = Agg(v.chisel)
+  def scalacPluginIvyDeps = Agg(v.chiselPlugin)
+
+  // Options recommended by Chisel. Inspect these
+  def scalacOptions = Seq(
+    "-unchecked",
+    "-deprecation",
+    "-language:reflectiveCalls",
+    "-feature",
+    "-Xcheckinit",
+    "-Ywarn-dead-code",
+    "-Ywarn-unused",
+    "-Ymacro-annotations",
+  )
+}
+
+object counter extends ChiselModule
+
+object b2t extends ChiselModule
+
+object top extends ChiselModule {
+  def moduleDeps = Seq(b2t, counter)
+}
